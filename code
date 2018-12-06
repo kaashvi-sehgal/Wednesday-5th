@@ -1,0 +1,2328 @@
+# Updated Animation Starter Code
+
+from tkinter import *
+import copy
+import random
+import pygame
+import time
+
+
+####################################
+# init
+####################################
+def playMusic():
+    pygame.mixer.music.load("GOT.wav")
+    pygame.mixer.music.play(-1,0.0)
+
+    # song = pygame.mixer.Sound('GOT.wav')
+    # clock = pygame.time.Clock()
+    # song.play()
+    # while True:
+    #     clock.tick(60)
+    # pygame.quit()
+
+
+def init(data):
+    pygame.init()
+    pygame.mixer.init()
+    data.BKing = PhotoImage(file="BKing.gif")
+    data.BQueen = PhotoImage(file="BQueen.gif")
+    data.BKnight = PhotoImage(file="BKnight.gif")
+    data.BRook = PhotoImage(file="BRook.gif")
+    data.BPawn = PhotoImage(file="BPawn.gif")
+    data.BBishop = PhotoImage(file="BBishop.gif")
+    data.WKing = PhotoImage(file="WKing.gif")
+    data.WQueen = PhotoImage(file="WQueen.gif")
+    data.WKnight = PhotoImage(file="WKnight.gif")
+    data.WRook = PhotoImage(file="WRook.gif")
+    data.WPawn = PhotoImage(file="WPawn.gif")
+    data.WBishop = PhotoImage(file="WBishop.gif")
+    data.normalPieces = True
+    data.BKing1 = PhotoImage(file="B-King.gif")
+    data.BQueen1 = PhotoImage(file="B-Queen.gif")
+    data.BKnight1 = PhotoImage(file="B-Knight.gif")
+    data.BRook1 = PhotoImage(file="B-Rook.gif")
+    data.BPawn1 = PhotoImage(file="B-Pawn.gif")
+    data.BBishop1 = PhotoImage(file="B-Bishop.gif")
+    data.WKing1 = PhotoImage(file="W-King.gif")
+    data.WQueen1 = PhotoImage(file="W-Queen.gif")
+    data.WKnight1 = PhotoImage(file="W-Knight.gif")
+    data.WRook1 = PhotoImage(file="W-Rook.gif")
+    data.WPawn1 = PhotoImage(file="W-Pawn.gif")
+    data.WBishop1 = PhotoImage(file="W-Bishop.gif")
+
+
+
+
+    data.originalBoard = [ 
+    ["B-Rook", "B-Knight", "B-Bishop", "B-Queen", "B-King", "B-Bishop", "B-Knight", "B-Rook"],
+    ["B-Pawn", "B-Pawn", "B-Pawn", "B-Pawn", "B-Pawn", "B-Pawn", "B-Pawn", "B-Pawn"],
+    [None, None, None, None, None, None, None, None], 
+    [None, None, None, None, None, None, None, None], 
+    [None, None, None, None, None, None, None, None], 
+    [None, None, None, None, None, None, None, None], 
+    ["W-Pawn", "W-Pawn", "W-Pawn", "W-Pawn", "W-Pawn", "W-Pawn", "W-Pawn", "W-Pawn"],
+    ["W-Rook", "W-Knight", "W-Bishop", "W-Queen", "W-King", "W-Bishop", "W-Knight", "W-Rook"] 
+    ]
+    
+    data.tryBoard = [ 
+    [Rook("B-Rook", 0, 0, data.originalBoard, data), Knight("B-Knight", 0, 1, data.originalBoard, data), Bishop("B-Bishop", 0, 2, data.originalBoard, data), Queen("B-Queen", 0, 3, data.originalBoard, data), King("B-King", 0, 4, data.originalBoard, data), Bishop("B-Bishop", 0, 5, data.originalBoard, data), Knight("B-Knight", 0, 6, data.originalBoard, data), Rook("B-Rook", 0, 7, data.originalBoard, data)],
+    [Pawn("B-Pawn", 1, 0, data.originalBoard, data), Pawn("B-Pawn", 1, 1, data.originalBoard, data), Pawn("B-Pawn", 1, 2, data.originalBoard, data), Pawn("B-Pawn", 1, 3, data.originalBoard, data), Pawn("B-Pawn", 1, 4, data.originalBoard, data), Pawn("B-Pawn", 1, 5, data.originalBoard, data), Pawn("B-Pawn", 1, 6, data.originalBoard, data), Pawn("B-Pawn", 1, 7, data.originalBoard, data)],
+    [None, None, None, None, None, None, None, None], 
+    [None, None, None, None, None, None, None, None], 
+    [None, None, None, None, None, None, None, None], 
+    [None, None, None, None, None, None, None, None], 
+    [Pawn("W-Pawn", 6, 0, data.originalBoard, data), Pawn("W-Pawn", 6, 1, data.originalBoard, data), Pawn("W-Pawn", 6, 2, data.originalBoard, data), Pawn("W-Pawn", 6, 3, data.originalBoard, data), Pawn("W-Pawn", 6, 4, data.originalBoard, data), Pawn("W-Pawn", 6, 5, data.originalBoard, data), Pawn("W-Pawn", 6, 6, data.originalBoard, data), Pawn("W-Pawn", 6, 7, data.originalBoard, data)],
+    [Rook("W-Rook", 7, 0, data.originalBoard, data), Knight("W-Knight", 7, 1, data.originalBoard, data), Bishop("W-Bishop", 7, 2, data.originalBoard, data), Queen("W-Queen", 7, 3, data.originalBoard, data), King("W-King", 7, 4, data.originalBoard, data), Bishop("W-Bishop", 7, 5, data.originalBoard, data), Knight("W-Knight", 7, 6, data.originalBoard, data), Rook("W-Rook", 7, 7, data.originalBoard, data)]
+    ]
+    data.tryBoardOriginal = copy.deepcopy(data.tryBoard)
+    
+    data.margin = data.width/10
+
+    data.board = copy.deepcopy(data.originalBoard)
+    #label all data values.
+    #create a new board that will be changed for final animation
+    data.newBoard= copy.deepcopy(data.board)
+    cellWidth = (data.width-(data.margin*2))//len(data.board[0])
+    cellHeight = (data.height-(data.margin*2))//len(data.board)
+    data.cellSize = min(cellWidth, cellHeight)
+    data.selection = 0
+    data.selectedRow = 0
+    data.selectedCol = 0
+    data.insertNum = 0
+    data.range = [str(i) for i in range(1, len(data.board)+1)]
+    data.finishGame = 0
+    data.mode = "startState"
+    data.isPaused = False
+    data.background = PhotoImage(file="rsz_scoreback.gif")
+    data.helpBackground = PhotoImage(file="helpBackground.gif")
+    data.allSelected = []
+    data.moveColor = 0
+    data.timer = 0
+    data.easyAIList = [Rook("B-Rook", 0, 0, data.originalBoard, data), Knight("B-Knight", 0, 1, data.originalBoard, data), Bishop("B-Bishop", 0, 2, data.originalBoard, data), Queen("B-Queen", 0, 3, data.originalBoard, data), King("B-King", 0, 4, data.originalBoard, data), Bishop("B-Bishop", 0, 5, data.originalBoard, data), Knight("B-Knight", 0, 6, data.originalBoard, data), Rook("B-Rook", 0, 7, data.originalBoard, data), Pawn("B-Pawn", 1, 0, data.originalBoard, data), Pawn("B-Pawn", 1, 1, data.originalBoard, data), Pawn("B-Pawn", 1, 2, data.originalBoard, data), Pawn("B-Pawn", 1, 3, data.originalBoard, data), Pawn("B-Pawn", 1, 4, data.originalBoard, data), Pawn("B-Pawn", 1, 5, data.originalBoard, data), Pawn("B-Pawn", 1, 6, data.originalBoard, data), Pawn("B-Pawn", 1, 7, data.originalBoard, data)]
+
+
+    
+    #position scores adapted and adjusted from several sources including
+    #https://en.wikipedia.org/wiki/Chess_piece_relative_value
+    #https://www.chessprogramming.org/Evaluation
+    #https://github.com/mnahinkhan/Chess/blob/master/Chess/chess.py
+    #https://medium.freecodecamp.org/simple-chess-ai-step-by-step-1d55a9266977
+    
+WPawnScores =[
+    [0, 0, 0, 0, 0, 0, 0, 0], 
+    [50, 100, 100, -200, -200, 100, 100, 50], 
+    [50, -50, -100, 0, 0, -100, -50, 50], 
+    [0, 0, 0, 200, 200, 0, 0, 0], 
+    [50, 50, 100, 250, 250, 100, 50, 50], 
+    [100, 100, 200, 300, 300, 200, 100, 100], 
+    [500, 500, 500, 500, 500, 500, 500, 500], 
+    [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+BPawnScores = [
+    [0, 0, 0, 0, 0, 0, 0, 0], 
+    [500, 500, 500, 500, 500, 500, 500, 500], 
+    [100, 100, 200, 300, 300, 200, 100, 100], 
+    [50, 50, 100, 250, 250, 100, 50, 50], 
+    [0, 0, 0, 200, 200, 0, 0, 0], 
+    [50, -50, -100, 0, 0, -100, -50, 50], 
+    [50, 100, 100, -200, -200, 100, 100, 50], 
+    [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+
+WKnightScores = [
+    [-500, -900, -300, -300, -300, -300, -900, -500], 
+    [-400, -200, 0, 50, 50, 0, -200, -400], 
+    [-300, 50, 100, 150, 150, 100, 50, -300], 
+    [-300, 0, 150, 200, 200, 150, 0, -300], 
+    [-300, 50, 150, 200, 200, 150, 50, -300], 
+    [-300, 0, 100, 150, 150, 100, 0, -300], 
+    [-400, -200, 0, 0, 0, 0, -200, -400], 
+    [-500, -400, -300, -300, -300, -300, -400, -500]
+    ]
+BKnightScores = [
+    [-500, -400, -300, -300, -300, -300, -400, -500], 
+    [-400, -200, 0, 0, 0, 0, -200, -400], 
+    [-300, 0, 100, 150, 150, 100, 0, -300], 
+    [-300, 50, 150, 200, 200, 150, 50, -300], 
+    [-300, 0, 150, 200, 200, 150, 0, -300], 
+    [-300, 50, 100, 150, 150, 100, 50, -300], 
+    [-400, -200, 0, 50, 50, 0, -200, -400], 
+    [-500, -900, -300, -300, -300, -300, -900, -500]
+    ]
+
+WBishopScores = [
+    [-200, -100, -900, -100, -100, -900, -100, -200], 
+    [-100, 50, 0, 0, 0, 0, 50, -100], 
+    [-100, 100, 100, 100, 100, 100, 100, -100], 
+    [-100, 0, 100, 100, 100, 100, 0, -100], 
+    [-100, 50, 50, 100, 100, 50, 50, -100], 
+    [-100, 0, 50, 100, 100, 50, 0, -100], 
+    [-100, 0, 0, 0, 0, 0, 0, -100], 
+    [-200, -100, -100, -100, -100, -100, -100, -200]
+    ]
+
+BBishopScores = [
+    [-200, -100, -100, -100, -100, -100, -100, -200], 
+    [-100, 0, 0, 0, 0, 0, 0, -100], 
+    [-100, 0, 50, 100, 100, 50, 0, -100], 
+    [-100, 50, 50, 100, 100, 50, 50, -100], 
+    [-100, 0, 100, 100, 100, 100, 0, -100], 
+    [-100, 100, 100, 100, 100, 100, 100, -100], 
+    [-100, 50, 0, 0, 0, 0, 50, -100], 
+    [-200, -100, -900, -100, -100, -900, -100, -200]
+    ]
+    
+WRookScores = [
+    [0, 0, 0, 50, 50, 0, 0, 0], 
+    [-50, 0, 0, 0, 0, 0, 0, -50], 
+    [-50, 0, 0, 0, 0, 0, 0, -50], 
+    [-50, 0, 0, 0, 0, 0, 0, -50], 
+    [-50, 0, 0, 0, 0, 0, 0, -50], 
+    [-50, 0, 0, 0, 0, 0, 0, -50], 
+    [50, 100, 100, 100, 100, 100, 100, 50], 
+    [0, 0, 0, 0, 0, 0, 0, 0]
+    ]
+
+BRookScores = [
+    [0, 0, 0, 0, 0, 0, 0, 0], 
+    [50, 100, 100, 100, 100, 100, 100, 50], 
+    [-50, 0, 0, 0, 0, 0, 0, -50], 
+    [-50, 0, 0, 0, 0, 0, 0, -50], 
+    [-50, 0, 0, 0, 0, 0, 0, -50], 
+    [-50, 0, 0, 0, 0, 0, 0, -50], 
+    [-50, 0, 0, 0, 0, 0, 0, -50], 
+    [0, 0, 0, 50, 50, 0, 0, 0]
+    ]
+
+WQueenScores = [
+    [-200, -100, -100, -50, 700, -100, -100, -200], 
+    [-100, 0, 0, 0, 0, 50, 0, -100], 
+    [-100, 0, 50, 50, 50, 50, 50, -100], 
+    [-50, 0, 50, 50, 50, 50, 0, 0], 
+    [-50, 0, 50, 50, 50, 50, 0, -50], 
+    [-100, 0, 50, 50, 50, 50, 0, -100], 
+    [-100, 0, 0, 0, 0, 0, 0, -100], 
+    [-200, -100, -100, -50, -50, -100, -100, -200]
+    ]
+
+BQueenScores = [
+    [-200, -100, -100, -50, -50, -100, -100, -200], 
+    [-100, 0, 0, 0, 0, 0, 0, -100], 
+    [-100, 0, 50, 50, 50, 50, 0, -100], 
+    [-50, 0, 50, 50, 50, 50, 0, -50], 
+    [0, 0, 50, 50, 50, 50, 0, -50], 
+    [-100, 50, 50, 50, 50, 50, 0, -100], 
+    [-100, 0, 50, 0, 0, 0, 0, -100], 
+    [-200, -100, -100, 700, -50, -100, -100, -200]
+    ]
+
+WKingScores = [
+    [200, 300, 100, 0, 0, 100, 300, 200], 
+    [200, 200, 0, 0, 0, 0, 200, 200], 
+    [-100, -200, -200, -200, -200, -200, -200, -100], 
+    [-200, -300, -300, -400, -400, -300, -300, -200], 
+    [-300, -400, -400, -500, -500, -400, -400, -300], 
+    [-300, -400, -400, -500, -500, -400, -400, -300], 
+    [-300, -400, -400, -500, -500, -400, -400, -300], 
+    [-300, -400, -400, -500, -500, -400, -400, -300]
+    ]
+BKingScores = [
+    [-300, -400, -400, -500, -500, -400, -400, -300], 
+    [-300, -400, -400, -500, -500, -400, -400, -300], 
+    [-300, -400, -400, -500, -500, -400, -400, -300], 
+    [-300, -400, -400, -500, -500, -400, -400, -300], 
+    [-200, -300, -300, -400, -400, -300, -300, -200], 
+    [-100, -200, -200, -200, -200, -200, -200, -100], 
+    [200, 200, 0, 0, 0, 0, 200, 200], 
+    [200, 300, 100, 0, 0, 100, 300, 200]
+    ]
+
+
+
+
+####################################
+# mode dispatcher
+####################################
+
+#3 different modes and screens. hence, three different types of each function
+
+#leads to the mouse pressed for specific state
+def mousePressed(event, data):
+    if (data.mode == "startState"):      startStateMousePressed(event, data)
+    elif (data.mode == "chooseTheme"):  chooseThemeMousePressed(event, data)
+    elif (data.mode == "choosePlayers"): choosePlayersMousePressed(event, data)
+    elif (data.mode == "chooseAI"):      chooseAIMousePressed(event, data)
+    elif (data.mode == "help"):          helpMousePressed(event, data)
+    elif (data.mode == "gameStateMulti"):     gameStateMultiMousePressed(event, data)
+    elif (data.mode == "gameStateEasyAI"):     gameStateEasyAIMousePressed(event, data)
+    elif (data.mode == "gameStateHardAI"):     gameStateHardAIMousePressed(event, data)
+    elif (data.mode == "gameOverState"): gameOverStateMousePressed(event, data)
+
+#leads to the key pressed for specific state
+def keyPressed(event, data):
+    if (data.mode == "startState"):         startStateKeyPressed(event, data)
+    elif (data.mode == "chooseTheme"):    chooseThemeKeyPressed(event, data)
+    elif (data.mode == "choosePlayers"):    choosePlayersKeyPressed(event, data)
+    elif (data.mode == "chooseAI"):         chooseAIKeyPressed(event, data)    
+    elif (data.mode == "help"):             helpKeyPressed(event, data)    
+    elif (data.mode == "gameStateMulti"):        gameStateMultiKeyPressed(event, data)
+    elif (data.mode == "gameStateEasyAI"):        gameStateEasyAIKeyPressed(event, data)
+    elif (data.mode == "gameStateHardAI"):        gameStateHardAIKeyPressed(event, data)
+    elif (data.mode == "gameOverState"):    gameOverStateKeyPressed(event, data)
+
+#leads to the timer fired for specific state
+def timerFired(data):
+    if (data.mode == "startState"):         startStateTimerFired(data)
+    elif (data.mode == "chooseTheme"):    chooseThemeTimerFired(data)    
+    elif (data.mode == "choosePlayers"):    choosePlayersTimerFired(data)    
+    elif (data.mode == "chooseAI"):         chooseAITimerFired(data)    
+    elif (data.mode == "help"):             helpTimerFired(data)    
+    elif (data.mode == "gameStateMulti"):        gameStateMultiTimerFired(data)
+    elif (data.mode == "gameStateEasyAI"):        gameStateEasyAITimerFired(data)
+    elif (data.mode == "gameStateHardAI"):        gameStateHardAITimerFired(data)
+    elif (data.mode == "gameOverState"):    gameOverStateTimerFired(data)
+
+#leads to the redraw for specific state
+def redrawAll(canvas, data):
+    if (data.mode == "startState"):         startStateRedrawAll(canvas, data)
+    elif (data.mode == "chooseTheme"):    chooseThemeRedrawAll(canvas, data) 
+    elif (data.mode == "choosePlayers"):    choosePlayersRedrawAll(canvas, data) 
+    elif (data.mode == "chooseAI"):         chooseAIRedrawAll(canvas, data)   
+    elif (data.mode == "help"):             helpRedrawAll(canvas, data)    
+    elif (data.mode == "gameStateMulti"):        gameStateMultiRedrawAll(canvas, data)
+    elif (data.mode == "gameStateEasyAI"):        gameStateEasyAIRedrawAll(canvas, data)
+    elif (data.mode == "gameStateHardAI"):        gameStateHardAIRedrawAll(canvas, data)
+    elif (data.mode == "gameOverState"):    gameOverStateRedrawAll(canvas, data)
+
+
+####################################
+# Defining Classes
+####################################
+
+class ChessPiece(object):
+    def __init__(self, item, row, col, board, data):
+        self.item = item
+        self.row = row
+        self.col = col
+        self.team = self.item[0]
+        if self.team == "W":
+            self.move = -1
+        if self.team == "B":
+            self.move = 1
+    
+    # def getCharacter(self):
+    #     characterImage = "GOTChess/%s.gif" %(str(self))
+    #     return PhotoImage(file = characterImage)
+        
+    def __eq__(self):
+        return isinstance(other, ChessPiece) and self.col == other.col and \
+         self.row == other.row and self.team == other.team
+    
+    def __repr__(self):
+        return self.item
+    
+    def __hash__(self):
+        return hash((self.row, self.col, self.team))
+    
+    def promotion(self):
+        if self.row == 0 or self.row == 7:
+            return True
+            
+    def getStrength(self):
+        return self.strength
+        
+    def getPossibleValue(self, scoreBoard):
+        changeInValue = scoreBoard[self.row][self.col]
+        tempStrength = self.strength
+        tempStrength += changeInValue
+        return tempStrength
+            
+class Pawn(ChessPiece):
+    def __init__(self, item, row, col, board, data):
+        super().__init__(item, row, col, board, data)
+        self.strength = board[self.row][self.col]
+
+    def allPossibleMoves(self, board, data):
+        allMoves = set()
+        newPossibleSpot = data.tryBoard[self.row + self.move][self.col]
+        firstPossibleSpot = data.tryBoard[self.row + 2*self.move][self.col]
+        if ((self.row == 6 and self.team == "W") or (self.row == 1 and \
+            self.team == "B")) and \
+            not isinstance(newPossibleSpot, ChessPiece) and not isinstance(firstPossibleSpot, ChessPiece):
+                allMoves.add((self.row + 2*self.move, self.col))
+        if not isinstance(newPossibleSpot, ChessPiece):
+            allMoves.add((self.row + self.move, self.col))
+
+
+        if (0<= self.row + self.move <= 7) and (0 <= self.col + self.move <=7):
+            if isinstance(data.tryBoard[self.row + self.move][self.col + self.move], ChessPiece):
+                if data.tryBoard[self.row + self.move][self.col + self.move].team != self.team:
+                    allMoves.add((self.row + self.move, self.col + self.move))
+                
+        if (0<= self.row + self.move <= 7) and (0 <= self.col - self.move <=7):
+            if isinstance(data.tryBoard[self.row + self.move][self.col - self.move], ChessPiece):
+                if data.tryBoard[self.row + self.move][self.col - self.move].team != self.team:
+                    allMoves.add((self.row + self.move, self.col - self.move))
+                
+        if (0<= self.row + self.move <= 7):
+            if not isinstance(data.tryBoard[self.row + self.move][self.col], ChessPiece):
+                allMoves.add((self.row + self.move, self.col))
+            elif data.tryBoard[self.row + self.move][self.col].team != self.team:
+                allMoves.add((self.row + self.move, self.col))
+                
+        return allMoves
+    
+class Rook(ChessPiece):
+    def __init__(self, item, row, col, board, data):
+        super().__init__(item, row, col, board, data)
+        self.strength = board[self.row][self.col]
+
+    def allPossibleMoves(self, board, data):
+        allMoves = set()
+        difference = 7-self.row
+        # for i in range(difference):
+        #     if not isinstance(data.tryBoard[self.row + self.move - i][self.col], ChessPiece):
+        #         allMoves.add((self.row + self.move - i, self.col))
+        
+        if self.team == "B":
+            row = self.row
+            while 7>= (row + self.move) >= 0:
+                print(data.tryBoard[row + self.move][self.col])
+                if not isinstance(data.tryBoard[row + self.move][self.col], ChessPiece):
+                    allMoves.add((row + self.move, self.col))
+                    row += 1
+                elif data.tryBoard[row + self.move][self.col].team != self.team:
+                    allMoves.add((row + self.move, self.col))
+                    break
+                elif data.tryBoard[row + self.move][self.col].team == self.team:
+                    break
+            col = self.col
+            while 7 >= (col + self.move) >= 0:
+                if not isinstance(data.tryBoard[self.row][col + self.move], ChessPiece):
+                    allMoves.add((self.row, col + self.move))
+                    col += 1
+                elif data.tryBoard[self.row][col + self.move].team != self.team:
+                    allMoves.add((self.row, col + self.move))
+                    break
+                elif data.tryBoard[self.row][col + self.move].team == self.team:
+                    break
+
+            #########
+            row = self.row
+            while 0<= (row - self.move) <= 7:
+                if not isinstance(data.tryBoard[row - self.move][self.col], ChessPiece):
+                    allMoves.add((row - self.move, self.col))
+                    row -= 1
+                elif data.tryBoard[row - self.move][self.col].team != self.team:
+                    allMoves.add((row - self.move, self.col))
+                    break
+                elif data.tryBoard[row - self.move][self.col].team == self.team:
+                    break
+
+                    
+            col = self.col
+            while 0<= (col - self.move) <= 7:
+                print(col - self.move)
+                if not isinstance(data.tryBoard[self.row][col - self.move], ChessPiece):
+                    allMoves.add((self.row, col - self.move))
+                    col -= 1
+                elif data.tryBoard[self.row][col - self.move].team != self.team:
+                    allMoves.add((self.row, col - self.move))
+                    break     
+                elif data.tryBoard[self.row][col - self.move].team == self.team:
+                    break           
+
+        
+                 #########
+                    #########
+            
+        if self.team == "W":
+            row = self.row
+            while 7>= (row + self.move) >= 0:
+                print(data.tryBoard[row + self.move][self.col])
+                if not isinstance(data.tryBoard[row + self.move][self.col], ChessPiece):
+                    allMoves.add((row + self.move, self.col))
+                    row -= 1
+                elif data.tryBoard[row + self.move][self.col].team != self.team:
+                    allMoves.add((row + self.move, self.col))
+                    break
+                elif data.tryBoard[row + self.move][self.col].team == self.team:
+                    break
+
+                    
+            col = self.col
+            while 7 >= (col + self.move) >= 0:
+                if not isinstance(data.tryBoard[self.row][col + self.move], ChessPiece):
+                    allMoves.add((self.row, col + self.move))
+                    col -= 1
+                elif data.tryBoard[self.row][col + self.move].team != self.team:
+                    allMoves.add((self.row, col + self.move))
+                    break
+                elif data.tryBoard[self.row][col + self.move].team == self.team:
+                    break
+
+            #########
+            row = self.row
+            while 0<= (row - self.move) <= 7:
+                if not isinstance(data.tryBoard[row - self.move][self.col], ChessPiece):
+                    allMoves.add((row - self.move, self.col))
+                    row += 1
+                elif data.tryBoard[row - self.move][self.col].team != self.team:
+                    allMoves.add((row - self.move, self.col))
+                    break
+                elif data.tryBoard[row - self.move][self.col].team == self.team:
+                    break
+
+            col = self.col
+            while 0<= (col - self.move) <= 7:
+                print(col - self.move)
+                if not isinstance(data.tryBoard[self.row][col - self.move], ChessPiece):
+                    allMoves.add((self.row, col - self.move))
+                    col += 1
+                elif data.tryBoard[self.row][col - self.move].team != self.team:
+                    allMoves.add((self.row, col - self.move))
+                    break     
+                elif data.tryBoard[self.row][col - self.move].team == self.team:
+                    break     
+
+        return allMoves
+##############################
+
+class Bishop(ChessPiece):
+    def __init__(self, item, row, col, board, data):
+        super().__init__(item, row, col, board, data)
+        self.strength = board[self.row][self.col]
+
+    def allPossibleMoves(self, board, data):
+        allMoves = set()
+        row = self.row
+        col = self.col
+        while (0<= row + self.move <= 7) and (0 <= col + self.move <=7):
+            if data.tryBoard[row + self.move][col + self.move].team == self.team:
+                break
+            elif not isinstance(data.tryBoard[row + self.move][col + self.move], ChessPiece):
+                allMoves.add((row + self.move, col + self.move))
+                row += 1
+                col += 1
+            elif data.tryBoard[row + self.move][col + self.move].team != self.team:
+                allMoves.add((row + self.move, col + self.move))
+                break  
+
+        row = self.row
+        col = self.col
+
+        while (0<= row - self.move <= 7) and (0 <= col + self.move <=7):
+            if data.tryBoard[row - self.move][col + self.move].team == self.team:
+                break  
+            elif not isinstance(data.tryBoard[row - self.move][col + self.move], ChessPiece):
+                allMoves.add((row - self.move, col + self.move))
+                row -= 1
+                col += 1
+            elif data.tryBoard[row - self.move][col + self.move].team != self.team:
+                allMoves.add((row - self.move, col + self.move))
+                break  
+
+        row = self.row
+        col = self.col
+
+        while (0<= row + self.move <= 7) and (0 <= col - self.move <=7):
+            if data.tryBoard[row + self.move][col + self.move].team == self.team:
+                break 
+
+            elif not isinstance(data.tryBoard[row + self.move][col - self.move], ChessPiece):
+                allMoves.add((row + self.move, col - self.move))
+                row += 1
+                col -= 1
+            elif data.tryBoard[row + self.move][col + self.move].team != self.team:
+                allMoves.add((row + self.move, col + self.move))
+                break 
+
+        row = self.row
+        col = self.col
+
+        while (0<= row - self.move <= 7) and (0 <= col - self.move <=7):
+            if data.tryBoard[row - self.move][col - self.move].team == self.team:
+                break          
+
+            elif not isinstance(data.tryBoard[row - self.move][col - self.move], ChessPiece):
+                allMoves.add((row - self.move, col - self.move))
+                row -= 1
+                col -= 1
+            elif data.tryBoard[row - self.move][col - self.move].team != self.team:
+                allMoves.add((row - self.move, col - self.move))
+                break          
+        print("possibleBishop moves are " + str(allMoves))
+        return allMoves
+##############################
+
+class Knight(ChessPiece):
+    def __init__(self, item, row, col, board, data):
+        super().__init__(item, row, col, board, data)
+        self.strength = board[self.row][self.col]
+
+    def allPossibleMoves(self, board, data):
+        allMoves = set()
+        row = self.row
+        col = self.col
+        if 0<=(row + self.move*2) <= 7 and 0<=(col + self.move) <= 7:
+            if not isinstance(data.tryBoard[row + self.move*2][col + self.move], ChessPiece):
+                allMoves.add((row + self.move*2, col + self.move))
+            elif data.tryBoard[row + self.move*2][col + self.move].team != self.team:
+                allMoves.add((row + self.move*2, col + self.move))
+                
+        if 0<=(row - self.move*2) <= 7 and 0<=(col + self.move) <= 7:
+            if not isinstance(data.tryBoard[row - self.move*2][col + self.move], ChessPiece):
+                allMoves.add((row - self.move*2, col + self.move))
+            elif data.tryBoard[row - self.move*2][col + self.move].team != self.team:
+                allMoves.add((row - self.move*2, col + self.move))
+                
+        if 0<=(row + self.move*2) <= 7 and 0<=(col - self.move) <= 7:
+            if not isinstance(data.tryBoard[row + self.move*2][col - self.move], ChessPiece):
+                allMoves.add((row + self.move*2, col - self.move))
+            elif data.tryBoard[row + self.move*2][col - self.move].team != self.team:
+                allMoves.add((row + self.move*2, col - self.move))
+                
+        if 0<=(row - self.move*2) <= 7 and 0<=(col - self.move) <= 7:
+            if not isinstance(data.tryBoard[row - self.move*2][col - self.move], ChessPiece):
+                allMoves.add((row - self.move*2, col - self.move))
+            elif data.tryBoard[row - self.move*2][col - self.move].team != self.team:
+                allMoves.add((row - self.move*2, col - self.move))
+                
+                
+        if 0<=(row + self.move) <= 7 and 0<=(col + self.move*2) <= 7:
+            if not isinstance(data.tryBoard[row + self.move][col + self.move*2], ChessPiece):
+                allMoves.add((row + self.move, col + self.move*2))
+            elif data.tryBoard[row + self.move][col + self.move*2].team != self.team:
+                allMoves.add((row + self.move, col + self.move*2))
+                
+        if 0<=(row + self.move) <= 7 and 0<=(col - self.move*2) <= 7:
+            if not isinstance(data.tryBoard[row + self.move][col - self.move*2], ChessPiece):
+                allMoves.add((row + self.move, col - self.move*2))
+            elif data.tryBoard[row + self.move][col - self.move*2].team != self.team:
+                allMoves.add((row + self.move, col - self.move*2))
+        
+        if 0<=(row - self.move) <= 7 and 0<=(col + self.move*2) <= 7:
+            if not isinstance(data.tryBoard[row - self.move][col + self.move*2], ChessPiece):
+                allMoves.add((row - self.move, col + self.move*2))
+            elif data.tryBoard[row - self.move][col + self.move*2].team != self.team:
+                allMoves.add((row - self.move, col + self.move*2))
+                
+        if 0<=(row - self.move) <= 7 and 0<=(col - self.move*2) <= 7:
+            if not isinstance(data.tryBoard[row - self.move][col - self.move*2], ChessPiece):
+                allMoves.add((row - self.move, col - self.move*2))
+            elif data.tryBoard[row - self.move][col - self.move*2].team != self.team:
+                allMoves.add((row - self.move, col - self.move*2))
+        print("all possible moves are " + str(allMoves))
+        return allMoves
+        
+
+
+        
+##############################
+
+
+class Queen(ChessPiece):
+    def __init__(self, item, row, col, board, data):
+        super().__init__(item, row, col, board, data)
+        self.strength = board[self.row][self.col]
+
+    def allPossibleMoves(self, board, data):
+        allMoves = set()
+        row = self.row
+        col = self.col
+        while (0<= row + self.move <= 7) and (0 <= col + self.move <=7):
+            if not isinstance(data.tryBoard[row + self.move][col + self.move], ChessPiece):
+                allMoves.add((row + self.move, col + self.move))
+                row += 1
+                col += 1
+            elif data.tryBoard[row + self.move][col + self.move].team != self.team:
+                allMoves.add((row + self.move, col + self.move))
+                break  
+            elif data.tryBoard[row + self.move][col + self.move].team == self.team:
+                break  
+
+        row = self.row
+        col = self.col
+
+        while (0<= row - self.move <= 7) and (0 <= col + self.move <=7):
+            if not isinstance(data.tryBoard[row - self.move][col + self.move], ChessPiece):
+                allMoves.add((row - self.move, col + self.move))
+                row -= 1
+                col += 1
+            elif data.tryBoard[row - self.move][col + self.move].team != self.team:
+                allMoves.add((row - self.move, col + self.move))
+                break  
+            elif data.tryBoard[row - self.move][col + self.move].team == self.team:
+                break  
+
+        row = self.row
+        col = self.col
+
+        while (0<= row + self.move <= 7) and (0 <= col - self.move <=7):
+            if not isinstance(data.tryBoard[row + self.move][col - self.move], ChessPiece):
+                allMoves.add((row + self.move, col - self.move))
+                row += 1
+                col -= 1
+            elif data.tryBoard[row + self.move][col - self.move].team != self.team:
+                allMoves.add((row + self.move, col - self.move))
+                break
+            elif data.tryBoard[row + self.move][col - self.move].team == self.team:
+                break  
+
+        row = self.row
+        col = self.col
+
+        while (0<= row - self.move <= 7) and (0 <= col - self.move <=7):
+            if not isinstance(data.tryBoard[row - self.move][col - self.move], ChessPiece):
+                allMoves.add((row - self.move, col - self.move))
+                row -= 1
+                col -= 1
+            elif data.tryBoard[row - self.move][col - self.move].team != self.team:
+                allMoves.add((row - self.move, col - self.move))
+                break
+            elif data.tryBoard[row - self.move][col - self.move].team == self.team:
+                break
+
+                       
+        if self.team == "B":
+            row = self.row
+            while 7>= (row + self.move) >= 0:
+                print(data.tryBoard[row + self.move][self.col])
+                if not isinstance(data.tryBoard[row + self.move][self.col], ChessPiece):
+                    allMoves.add((row + self.move, self.col))
+                    row += 1
+                elif data.tryBoard[row + self.move][self.col].team != self.team:
+                    allMoves.add((row + self.move, self.col))
+                    break
+                elif data.tryBoard[row + self.move][self.col].team == self.team:
+                    break
+
+            col = self.col
+            while 7 >= (col + self.move) >= 0:
+                if not isinstance(data.tryBoard[self.row][col + self.move], ChessPiece):
+                    allMoves.add((self.row, col + self.move))
+                    col += 1
+                elif data.tryBoard[self.row][col + self.move].team != self.team:
+                    allMoves.add((self.row, col + self.move))
+                    break
+                elif data.tryBoard[self.row][col + self.move].team == self.team:
+                    break
+
+            #########
+            row = self.row
+            while 0<= (row - self.move) <= 7:
+                if not isinstance(data.tryBoard[row - self.move][self.col], ChessPiece):
+                    allMoves.add((row - self.move, self.col))
+                    row -= 1
+                elif data.tryBoard[row - self.move][self.col].team != self.team:
+                    allMoves.add((row - self.move, self.col))
+                    break
+                elif data.tryBoard[row - self.move][self.col].team == self.team:
+                    break
+
+            col = self.col
+            while 0<= (col - self.move) <= 7:
+                print(col - self.move)
+                if not isinstance(data.tryBoard[self.row][col - self.move], ChessPiece):
+                    allMoves.add((self.row, col - self.move))
+                    col -= 1
+                elif data.tryBoard[self.row][col - self.move].team != self.team:
+                    allMoves.add((self.row, col - self.move))
+                    break           
+                elif data.tryBoard[self.row][col - self.move].team == self.team:
+                    break           
+
+        
+                 #########
+                    #########
+            
+        if self.team == "W":
+            row = self.row
+            while 7>= (row + self.move) >= 0:
+                print(data.tryBoard[row + self.move][self.col])
+                if not isinstance(data.tryBoard[row + self.move][self.col], ChessPiece):
+                    allMoves.add((row + self.move, self.col))
+                    row -= 1
+                elif data.tryBoard[row + self.move][self.col].team != self.team:
+                    allMoves.add((row + self.move, self.col))
+                    break
+                elif data.tryBoard[row + self.move][self.col].team == self.team:
+                    break
+
+            col = self.col
+            while 7 >= (col + self.move) >= 0:
+                if not isinstance(data.tryBoard[self.row][col + self.move], ChessPiece):
+                    allMoves.add((self.row, col + self.move))
+                    col -= 1
+                elif data.tryBoard[self.row][col + self.move].team != self.team:
+                    allMoves.add((self.row, col + self.move))
+                    break
+                elif data.tryBoard[self.row][col + self.move].team == self.team:
+                    break
+
+            #########
+            row = self.row
+            while 0<= (row - self.move) <= 7:
+                if not isinstance(data.tryBoard[row - self.move][self.col], ChessPiece):
+                    allMoves.add((row - self.move, self.col))
+                    row += 1
+                elif data.tryBoard[row - self.move][self.col].team != self.team:
+                    allMoves.add((row - self.move, self.col))
+                    break
+                elif data.tryBoard[row - self.move][self.col].team == self.team:
+                    break
+
+            col = self.col
+            while 0<= (col - self.move) <= 7:
+                print(col - self.move)
+                if not isinstance(data.tryBoard[self.row][col - self.move], ChessPiece):
+                    allMoves.add((self.row, col - self.move))
+                    col += 1
+                elif data.tryBoard[self.row][col - self.move].team != self.team:
+                    allMoves.add((self.row, col - self.move))
+                    break
+                elif data.tryBoard[self.row][col - self.move].team == self.team:
+                    break
+
+        return allMoves
+
+##############################
+
+
+class King(ChessPiece):
+    def __init__(self, item, row, col, board, data):
+        super().__init__(item, row, col, board, data)
+        self.strength = board[self.row][self.col]
+
+    def allPossibleMoves(self, board, data):
+        allMoves = set()
+        if (0<= self.row + self.move <= 7) and (0 <= self.col + self.move <=7):
+            if not isinstance(data.tryBoard[self.row + self.move][self.col + self.move], ChessPiece):
+                allMoves.add((self.row + self.move, self.col + self.move))
+            elif data.tryBoard[self.row + self.move][self.col + self.move].team != self.team:
+                allMoves.add((self.row + self.move, self.col + self.move))
+                
+        if (0<= self.row - self.move <= 7) and (0 <= self.col + self.move <=7):
+            if not isinstance(data.tryBoard[self.row - self.move][self.col + self.move], ChessPiece):
+                allMoves.add((self.row - self.move, self.col + self.move))
+            elif data.tryBoard[self.row - self.move][self.col + self.move].team != self.team:
+                allMoves.add((self.row - self.move, self.col + self.move))
+
+        if (0<= self.row + self.move <= 7) and (0 <= self.col - self.move <=7):
+            if not isinstance(data.tryBoard[self.row + self.move][self.col - self.move], ChessPiece):
+                allMoves.add((self.row + self.move, self.col - self.move))
+            elif data.tryBoard[self.row + self.move][self.col + self.move].team != self.team:
+                allMoves.add((self.row + self.move, self.col + self.move))
+                
+        if (0<= self.row - self.move <= 7) and (0 <= self.col - self.move <=7):
+            if not isinstance(data.tryBoard[self.row - self.move][self.col - self.move], ChessPiece):
+                allMoves.add((self.row - self.move, self.col - self.move))
+            elif data.tryBoard[self.row - self.move][self.col - self.move].team != self.team:
+                allMoves.add((self.row - self.move, self.col - self.move))
+
+        if (0<= self.row + self.move <= 7):
+            if not isinstance(data.tryBoard[self.row + self.move][self.col], ChessPiece):
+                allMoves.add((self.row + self.move, self.col))
+            elif data.tryBoard[self.row + self.move][self.col].team != self.team:
+                allMoves.add((self.row + self.move, self.col))
+        
+        if  (0 <= self.col + self.move <=7):
+            if not isinstance(data.tryBoard[self.row][self.col + self.move], ChessPiece):
+                allMoves.add((self.row, self.col + self.move))
+            elif data.tryBoard[self.row][self.col + self.move].team != self.team:
+                allMoves.add((self.row, self.col + self.move))
+             #########
+       
+        if (0<= self.row - self.move <= 7):
+            if not isinstance(data.tryBoard[self.row - self.move][self.col], ChessPiece):
+                allMoves.add((self.row - self.move, self.col))
+            elif data.tryBoard[self.row - self.move][self.col].team != self.team:
+                allMoves.add((self.row - self.move, self.col))
+                
+        if  (0 <= self.col - self.move <=7):
+            if not isinstance(data.tryBoard[self.row][self.col - self.move], ChessPiece):
+                allMoves.add((self.row, self.col - self.move))
+            elif data.tryBoard[self.row][self.col - self.move].team != self.team:
+                allMoves.add((self.row, self.col - self.move))
+        return allMoves
+
+
+
+
+####################################
+# startState mode
+####################################
+
+#the start star mode displays the starting screen where 
+def startStateMousePressed(event, data):
+    if (data.width/2- 3*data.margin) <= event.x <= (data.width/2-data.margin) and\
+        (data.height-data.margin*3) <= event.y <= (data.height - data.margin*2):
+        data.mode = "chooseTheme"
+            
+  
+    #help                        
+    if (data.width/2+data.margin) <= event.x <= (data.width/2+ 3*data.margin) and\
+        (data.height-data.margin*3) <= event.y <= (data.height - data.margin*2):
+        data.mode = "help"
+        
+def startStateKeyPressed(event, data):
+    if (event.char == "h"):
+        data.mode = "help"
+    if (event.char == "r"):
+        data.mode = "startState"
+
+    
+    
+def startStateTimerFired(data):
+    pass
+    
+
+    
+#function draws writing for the start screen. including instructions on how
+#to start game.
+def startStateRedrawAll(canvas, data):
+    canvas.create_image(0, 0,
+                    anchor=NW,image=data.background)
+    canvas.create_text(data.width/2, data.height/2-data.margin*3,
+                       text="Welcome to", font="GameofThrones 26 bold")
+    canvas.create_line(data.width/2-data.width/4, data.height/2-data.margin*2.7,
+     data.width/2+data.width/4, data.height/2-data.margin*2.7, width = 5) 
+     
+    canvas.create_line(data.width/2-data.width/4, data.height/2-data.margin*2.6,
+     data.width/2+data.width/4, data.height/2-data.margin*2.6, width = 5)                  
+                 
+    
+    canvas.create_text(data.width/2, data.height/2-data.margin*1.5,
+                       text="Game  Of  Thrones" + "\n" + \
+                       "                 Chess", 
+                       font="GameofThrones 50 bold")
+                       
+    canvas.create_oval(data.width/2- 3*data.margin, data.height-data.margin*3, 
+    data.width/2-data.margin, data.height - data.margin*2, fill = "black")
+    
+    canvas.create_text(data.width/2 -2*data.margin, 
+                        data.height-data.margin*2.5,
+                       text="Play", font="GameofThrones 30 bold", 
+                       fill = "white")
+    
+    canvas.create_oval(data.width/2+data.margin, 
+                        data.height-data.margin*3, 
+                        data.width/2+ 3*data.margin, 
+                        data.height - data.margin*2, fill = "black")
+    
+    canvas.create_text(data.width/2 + data.margin*2, 
+                        data.height-data.margin*2.5,
+                       text="Help", font="GameofThrones 30 bold",
+                       fill = "white")
+####################################
+# chooseTheme mode
+####################################
+
+#the start star mode displays the starting screen where 
+#standard themed
+def chooseThemeMousePressed(event, data):
+    if (data.width/2- 3*data.margin) <= event.x <= (data.width/2-data.margin) and\
+        (data.height-data.margin*3) <= event.y <= (data.height - data.margin*2):
+        data.mode = "choosePlayers"
+        data.normalPieces = False
+            
+  
+    #game of thrones themed                        
+    if (data.width/2+data.margin) <= event.x <= (data.width/2+ 3*data.margin) and\
+        (data.height-data.margin*3) <= event.y <= (data.height - data.margin*2):
+        data.mode = "choosePlayers"
+        data.normalPieces = True
+
+        
+def chooseThemeKeyPressed(event, data):
+    if (event.char == "h"):
+        data.mode = "help"
+    if (event.char == "r"):
+        data.mode = "startState"
+
+    
+    
+def chooseThemeTimerFired(data):
+    pass
+    
+
+#function draws writing for the start screen. including instructions on how
+#to start game.
+def chooseThemeRedrawAll(canvas, data):
+    canvas.create_image(0, 0,
+                    anchor=NW,image=data.background)
+    canvas.create_text(data.width/2, data.height/2-data.margin*3,
+                       text="Choose Your Theme", font="GameofThrones 26 bold")
+    canvas.create_line(data.width/2-data.width/4, data.height/2-data.margin*2.7,
+     data.width/2+data.width/4, data.height/2-data.margin*2.7, width = 5) 
+     
+    canvas.create_line(data.width/2-data.width/4, data.height/2-data.margin*2.6,
+     data.width/2+data.width/4, data.height/2-data.margin*2.6, width = 5)                  
+                 
+    
+    canvas.create_text(data.width/2, data.height/2-data.margin*1.5,
+                       text="Game  Of  Thrones Theme" + "\n" + \
+                       "       or Normal Chess Mode?", 
+                       font="GameofThrones 35 bold")
+                       
+    canvas.create_oval(data.width/2- 3*data.margin, data.height-data.margin*3, 
+    data.width/2-data.margin, data.height - data.margin*2, fill = "black")
+    
+    canvas.create_text(data.width/2 -2*data.margin, 
+                        data.height-data.margin*2.5,
+                       text="GOT", font="GameofThrones 30 bold", 
+                       fill = "white")
+    
+    canvas.create_oval(data.width/2+data.margin, 
+                        data.height-data.margin*3, 
+                        data.width/2+ 3*data.margin, 
+                        data.height - data.margin*2, fill = "black")
+    
+    canvas.create_text(data.width/2 + data.margin*2, 
+                        data.height-data.margin*2.5,
+                       text="Normal", font="GameofThrones 20 bold",
+                       fill = "white")
+
+
+####################################
+# choosePlayers mode
+####################################
+
+#the start star mode displays the starting screen where 
+def choosePlayersMousePressed(event, data):
+    
+    #single player                            
+    if (data.width/2- 3*data.margin) <= event.x <= (data.width/2-data.margin) and\
+        (data.height-data.margin*3) <= event.y <= (data.height - data.margin*2):
+        data.mode = "chooseAI"
+            
+  
+    #multiplayer                        
+    if (data.width/2+data.margin) <= event.x <= (data.width/2+ 3*data.margin) and\
+        (data.height-data.margin*3) <= event.y <= (data.height - data.margin*2):
+        data.mode = "gameStateMulti"
+
+def choosePlayersKeyPressed(event, data):
+   # data.mode = "gameStateMulti"
+    if (event.char == "p"):
+        data.mode = "gameStateMulti"
+    if (event.char == "r"):
+        data.mode = "startState"
+
+def choosePlayersTimerFired(data):
+    pass
+    
+#function draws writing for the start screen. including instructions on how
+#to start game.
+def choosePlayersRedrawAll(canvas, data):
+    canvas.create_image(0, 0,
+                    anchor=NW,image=data.background)
+                    
+    canvas.create_text(data.width/2, data.height/2- 4*data.margin,
+                       text="How would you" + "\n" + "       like to play?", 
+                                font="GameofThrones 32 bold")
+                                
+    canvas.create_line(data.width/2- 3*data.margin, 
+                        data.height/2-3.4*data.margin,
+                        data.width/2 +3*data.margin, 
+                        data.height/2-3.4*data.margin,
+                        fill = "Black", width = 5)
+    
+    canvas.create_line(data.width/2- 3*data.margin, 
+                        data.height/2-3.3*data.margin,
+                        data.width/2 +3*data.margin, 
+                        data.height/2-3.3*data.margin,
+                        fill = "Black", width = 5)
+    
+    canvas.create_text(data.width/2, data.height/2- 2*data.margin,
+                       text="       Single or" + "\n" + " Multiplayer?", 
+                                font="GameofThrones 56 bold")
+                                
+    canvas.create_text(data.width/2, data.height/2 + 4.5*data.margin,
+                       text="Press 'r' to  go back to main screen", 
+                                font="GameofThrones 20 bold", fill = "white")
+    
+    #single player                            
+    canvas.create_oval(data.width/2- 3*data.margin, data.height-data.margin*3, 
+    data.width/2-data.margin, data.height - data.margin*2, fill = "black")
+    
+    canvas.create_text(data.width/2 -2*data.margin, 
+                        data.height-data.margin*2.5,
+                       text="Single", font="GameofThrones 30 bold", 
+                       fill = "white")
+    
+    canvas.create_oval(data.width/2+data.margin, 
+                        data.height-data.margin*3, 
+                        data.width/2+ 3*data.margin, 
+                        data.height - data.margin*2, fill = "black")
+    
+    canvas.create_text(data.width/2 + data.margin*2, 
+                        data.height-data.margin*2.5,
+                       text="Multi", font="GameofThrones 30 bold",
+                       fill = "white")
+
+                                
+
+####################################
+# chooseAI mode
+####################################
+
+#the start star mode displays the starting screen where 
+def chooseAIMousePressed(event, data):
+    #single player                            
+    if (data.width/2- 3*data.margin) <= event.x <= (data.width/2-data.margin) and\
+        (data.height-data.margin*3) <= event.y <= (data.height - data.margin*2):
+        data.mode = "gameStateEasyAI"
+            
+  
+    #multiplayer                        
+    if (data.width/2+data.margin) <= event.x <= (data.width/2+ 3*data.margin) and\
+        (data.height-data.margin*3) <= event.y <= (data.height - data.margin*2):
+        data.mode = "gameStateHardAI"
+
+def chooseAIKeyPressed(event, data):
+   # data.mode = "gameStateMulti"
+    if (event.char == "p"):
+        data.mode = "gameStateMulti"
+    if (event.char == "r"):
+        data.mode = "startState"
+
+def chooseAITimerFired(data):
+    pass
+    
+#function draws writing for the start screen. including instructions on how
+#to start game.
+def chooseAIRedrawAll(canvas, data):
+    canvas.create_image(0, 0,
+                    anchor=NW,image=data.background)
+                    
+    canvas.create_text(data.width/2, data.height/2- 4*data.margin,
+                       text="How would you" + "\n" + "       like to play?", 
+                                font="GameofThrones 32 bold")
+                                
+    canvas.create_line(data.width/2- 3*data.margin, 
+                        data.height/2-3.4*data.margin,
+                        data.width/2 +3*data.margin, 
+                        data.height/2-3.4*data.margin,
+                        fill = "Black", width = 5)
+    
+    canvas.create_line(data.width/2- 3*data.margin, 
+                        data.height/2-3.3*data.margin,
+                        data.width/2 +3*data.margin, 
+                        data.height/2-3.3*data.margin,
+                        fill = "Black", width = 5)
+    
+    canvas.create_text(data.width/2, data.height/2- 2*data.margin,
+                       text=" Easy or Hard?", 
+                                font="GameofThrones 56 bold")
+                                
+    canvas.create_text(data.width/2, data.height/2 + 4.5*data.margin,
+                       text="Press 'r' to  go back to main screen", 
+                                font="GameofThrones 20 bold", fill = "white")
+    
+    #single player                            
+    canvas.create_oval(data.width/2- 3*data.margin, data.height-data.margin*3, 
+    data.width/2-data.margin, data.height - data.margin*2, fill = "black")
+    
+    canvas.create_text(data.width/2 -2*data.margin, 
+                        data.height-data.margin*2.5,
+                       text="Easy", font="GameofThrones 30 bold", 
+                       fill = "white")
+    
+    canvas.create_oval(data.width/2+data.margin, 
+                        data.height-data.margin*3, 
+                        data.width/2+ 3*data.margin, 
+                        data.height - data.margin*2, fill = "black")
+    
+    canvas.create_text(data.width/2 + data.margin*2, 
+                        data.height-data.margin*2.5,
+                       text="Hard", font="GameofThrones 30 bold",
+                       fill = "white")
+
+
+
+####################################
+# help screen mode
+####################################
+
+#the start star mode displays the starting screen where 
+def helpMousePressed(event, data):
+    #return to start
+    if (data.width/2- 3*data.margin) <= event.x <= (data.width/2-data.margin) and\
+        (data.height-data.margin*2) <= event.y <= (data.height - data.margin):
+        data.mode = "startState"
+            
+  
+    #return game                        
+    if (data.width/2+data.margin) <= event.x <= (data.width/2+ 3*data.margin) and\
+        (data.height-data.margin*2) <= event.y <= (data.height - data.margin):
+        data.mode = "gameStateMulti"
+
+def helpKeyPressed(event, data):
+   # data.mode = "gameStateMulti"
+    if (event.char == "p"):
+        data.mode = "gameStateMulti"
+    if (event.char == "r"):
+        data.mode = "startState"
+
+
+def helpTimerFired(data):
+    pass
+    
+#function draws writing for the start screen. including instructions on how
+#to start game.
+def helpRedrawAll(canvas, data):
+    canvas.create_rectangle(0, 0, data.width, data.height, fill = "black")
+    canvas.create_image(0, data.margin*2,
+                    anchor=NW,image=data.helpBackground)
+    canvas.create_text(data.width/2, data.margin,
+                       text="Help Screen", 
+                                font="GameofThrones 72 bold", fill = "white")
+
+                                
+    helpScreenText = """
+    
+                           Game of Thrones (GOT) themed chess works
+                           in the same way that standard chess works. 
+                           However, unlike the standard chess pieces, 
+                           GOT themed chess introduces GOT characters 
+                           to play as the chess pieces.
+                           
+                            This is what the characters represent:
+                        
+                            BKing =                           WKing =
+                        
+                            BQueen =                        WQueen = 
+                        
+                            BKnight =                         WKnight =
+                        
+                            BRook =                           WRook = 
+                        
+                            BBishop =                         WBishop = 
+                        
+                            BPawn =                           WPawn = 
+                        
+                        
+"""
+    canvas.create_image(data.width/2-data.margin*1.8, data.height/2-data.margin*0.5,
+                    anchor=NW,image=data.BKing)
+    canvas.create_image(data.width/2-data.margin*1.8, data.height/2+data.margin*0.4,
+                    anchor=NW,image=data.BQueen)
+    canvas.create_image(data.width/2-data.margin*1.8, data.height/2+data.margin*1.3,
+                    anchor=NW,image=data.BKnight)
+    canvas.create_image(data.width/2-data.margin*1.8, data.height/2+data.margin*2.2,
+                    anchor=NW,image=data.BRook)
+    canvas.create_image(data.width/2-data.margin*1.8, data.height/2+data.margin*3.1,
+                    anchor=NW,image=data.BBishop)
+    canvas.create_image(data.width/2-data.margin*1.8, data.height/2+data.margin*4.0,
+                    anchor=NW,image=data.BPawn)
+
+                    
+    canvas.create_line(data.width/2- 4*data.margin, 
+                        data.height/2-3.4*data.margin,
+                        data.width/2 +4*data.margin, 
+                        data.height/2-3.4*data.margin,
+                        fill = "White", width = 5)
+    
+    canvas.create_line(data.width/2- 4*data.margin, 
+                        data.height/2-3.3*data.margin,
+                        data.width/2 +4*data.margin, 
+                        data.height/2-3.3*data.margin,
+                        fill = "White", width = 5)
+                                
+                                
+    canvas.create_text(data.width/2-data.margin, data.margin*5.4,
+                       text=helpScreenText, 
+                                font="CaviarDreams 30", fill = "white")
+                                                       
+                       
+    canvas.create_oval(data.width/2- 3*data.margin, data.height-data.margin, 
+    data.width/2-data.margin, data.height-10, fill = "white")
+    
+    canvas.create_text(data.width/2 -2*data.margin, 
+                        data.height-data.margin*0.6,
+                       text="Start Screen", font="CaviarDreams 25 bold", 
+                       fill = "Black")
+    
+    canvas.create_oval(data.width/2+data.margin, 
+                        data.height-data.margin, 
+                        data.width/2+ 3*data.margin, 
+                        data.height-10, fill = "white")
+    
+    canvas.create_text(data.width/2 + data.margin*2, 
+                        data.height-data.margin*0.6,
+                       text="Back To Game", font="CaviarDreams 25 bold",
+                       fill = "Black")
+####################################
+# gameStateMulti mode
+####################################
+def checkMate(data, team):
+    for row in range(len(data.tryBoard)):
+        for col in range(len(data.tryBoard[row])):
+            chessPiece = str(data.tryBoard[row][col])
+            if team == "W":
+                if chessPiece == "W-King":
+                    return True
+            if team == "B":
+                if chessPiece == "B-King":
+                    return True
+    return False
+
+
+
+
+
+
+def gameStateMultiKeyPressed(event, data):
+    #if game is finished, dont take anymore pressed keys.
+    if data.finishGame == 1:
+        pass
+    #move rows and columns for shifting keys up, down, left, right
+    elif event.keysym == "Up":
+        data.selectedRow -= 1
+    elif event.keysym == "Down":
+        data.selectedRow += 1
+    elif event.keysym == "Left":
+        data.selectedCol -= 1
+    elif event.keysym == "Right":
+        data.selectedCol += 1
+    elif event.keysym == "p":
+        data.mode = "gameOverState"
+    #insert input by user.
+    elif event.char in data.range:
+        data.insertNum = event.char
+    #selected keys by user
+    data.selection = \
+    (data.selectedRow%(len(data.board)), data.selectedCol%(len(data.board)))
+
+
+def gameStateMultiMousePressed(event, data):
+    #if game is finished, dont take anymore pressed mouses.
+    if data.finishGame == 1:
+        pass
+    else:
+        if (data.width-data.margin*2) <= event.x <= (data.width-data.margin) and \
+        (data.margin/8) <= event.y <= (data.margin-30):
+            data.mode = "gameOverState"
+            data.board =  data.tryBoardOriginal
+   
+        if (data.margin) <= event.x<= (data.width/2-data.margin*3) and \
+        (data.margin/8) <= event.y <= (data.margin-30):
+            data.mode = "help"
+            data.board =  data.tryBoardOriginal
+
+        #row and column currently selected by user.
+        data.selectedRow = (event.y -(data.margin)) // data.cellSize
+        data.selectedCol = (event.x -(data.margin))// data.cellSize
+        data.selection = (data.selectedRow, data.selectedCol)
+        if data.selectedRow >= 0 and data.selectedCol >= 0:
+            data.allSelected.append(data.selection)
+            
+        for row in range(len(data.board)):
+            for col in range(len(data.board[row])):
+                if data.allSelected != []:
+                    if len(data.allSelected) %2 == 0:
+                        currRow, currCol = data.allSelected[-1][0], data.allSelected[-1][1]
+                        if currRow == row and currCol == col:
+                            makeMoveMulti(data, event)
+
+def drawBoardMulti(canvas, data):
+    #drawbottomBoard(canvas, data)
+
+    for row in range(len(data.tryBoard)):
+        for col in range(len(data.tryBoard[row])):
+            chessPieceType = str(data.tryBoard[row][col])
+
+                
+            left = col*data.cellSize
+            top = row*data.cellSize
+            #if square/cell is selected, change color of cell.
+            if (row, col) == data.selection:
+                color = "salmon"
+            
+            else:
+                if row%2 == 0 and col%2 != 0:
+                    color = "light blue"
+                if row%2 == 0 and col%2 == 0:
+                    color = "midnightblue"
+
+                if row%2 != 0 and col%2 != 0:
+                    color = "midnightblue"
+                if row%2 != 0 and col%2 == 0:
+                    color = "light blue"
+                    
+            canvas.create_rectangle(data.margin + left, data.margin + top, 
+                                    data.margin + left + data.cellSize, 
+                                    data.margin + top + data.cellSize,
+                                    fill=color, width = 1, outline = "white")
+            
+            if chessPieceType != None:
+                if chessPieceType[0] == "W":
+
+                    if data.normalPieces == False:
+                        canvas.create_text( 
+                                    data.margin + left + data.cellSize/2, 
+                                    data.margin + top + data.cellSize/2,
+                                    text=chessPieceType, fill = "white")
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKing)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WQueen)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WPawn)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKnight)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WRook)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WBishop)
+                    else:
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKing1)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WQueen1)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WPawn1)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKnight1)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WRook1)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WBishop1)
+
+
+
+                if chessPieceType[0] == "B":
+                    if data.normalPieces == False:
+    
+                        canvas.create_text(
+                                        data.margin + left + data.cellSize/2, 
+                                        data.margin + top + data.cellSize/2,
+                                        text=chessPieceType, fill = "Black")
+                        
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKing)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BQueen)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BPawn)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKnight)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BRook)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BBishop)
+                    else:
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKing1)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BQueen1)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BPawn1)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKnight1)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BRook1)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BBishop1)
+
+
+
+                                    
+                                    
+                                    
+    for row in range(len(data.board)):
+        top = row*data.cellSize
+        canvas.create_text(data.margin-10, top + data.margin*(1.5),
+        text = len(data.board) - row) 
+    
+    for row in range(len(data.board)):
+        left = row*data.cellSize
+        canvas.create_text(left + data.margin*1.5, data.height - data.margin+10,
+        text = chr(65+row)) 
+
+def makeMoveMulti(data, event):
+    original = data.allSelected[-2]
+    currRow = int(original[0])
+    currCol = int(original[1])
+
+    move = data.allSelected[-1]
+    newRow = int(move[0])
+    newCol = int(move[1])
+    chessPieceType = (data.tryBoard[currRow][currCol])
+    print(newRow, newCol)
+    if data.moveColor%2 == 0 and str(chessPieceType)[0] == "W":
+        if isLegalMove(data, chessPieceType, currRow, currCol, newRow, newCol):
+            data.tryBoard[newRow][newCol] = chessPieceType
+            data.tryBoard[currRow][currCol] = None
+            data.originalBoard[newRow][newCol] = str(chessPieceType)
+            data.originalBoard[currRow][currCol] = None
+            chessPieceType.row = newRow
+            chessPieceType.col = newCol
+            print(data.originalBoard)
+            data.moveColor += 1
+
+            
+    if data.moveColor%2 != 0 and str(chessPieceType)[0] == "B":
+
+        if isLegalMoveMulti(data, chessPieceType, currRow, currCol, newRow, newCol):
+            data.tryBoard[newRow][newCol] = chessPieceType
+            data.tryBoard[currRow][currCol] = None
+            data.originalBoard[newRow][newCol] = str(chessPieceType)
+            data.originalBoard[currRow][currCol] = None
+            print(data.originalBoard)
+            chessPieceType.row = newRow
+            chessPieceType.col = newCol
+
+            data.moveColor += 1
+
+
+        print("hey")
+
+
+def isLegalMoveMulti(data, chessPieceType, currRow, currCol, newRow, newCol):
+    chessItem = str(chessPieceType)
+    possibleMoves = chessPieceType.allPossibleMoves(data.tryBoard, data)
+    print(possibleMoves)
+    if (newRow, newCol) not in possibleMoves:
+        return False    
+    return True
+
+
+
+def drawbottomBoardMulti(canvas, data):
+    canvas.create_rectangle(0, 0, data.width, data.height, fill = "black")
+    
+    canvas.create_rectangle(data.margin- data.margin/4, 
+    data.margin- data.margin/4, data.width - data.margin/4*3, 
+    data.height-data.margin/4*3, fill = "white")
+
+
+def gameStateMultiTimerFired(data):
+    if not checkMate(data, "W"):
+        data.mode = "gameOverState"
+    if not checkMate(data, "B"):
+        data.mode = "gameOverState"
+
+
+def drawHelpButtonMulti(canvas, data):
+    canvas.create_rectangle(data.margin, data.margin/8, 
+        data.width/2-data.margin*3, data.margin-30, fill = "mediumpurple4")
+        
+    canvas.create_text(data.margin, data.margin/4, anchor = NW,
+    text = "   Help", font="GameofThrones 20", fill = "white")
+    
+def drawQuitButtonMulti(canvas, data):
+    canvas.create_rectangle(data.width - data.margin, data.margin/8, 
+        data.width-data.margin*2, data.margin-30, fill = "mediumpurple4")
+        
+    canvas.create_text(data.width - data.margin*2, data.margin/4, anchor = NW,
+    text = "  Quit", font="GameofThrones 20", fill = "white")
+
+def drawPlayerMulti(canvas, data):
+    if data.moveColor %2 == 0:
+        canvas.create_rectangle(data.width/2 - data.margin*2, data.margin/8, 
+            data.width/2 + data.margin*2, data.margin-30, fill = "mediumpurple4")
+            
+        canvas.create_text(data.width/2, data.margin/2.5,
+        text = "White   Player's   Turn", font="GameofThrones 20", fill = "white")
+    
+    if data.moveColor %2 != 0:
+        canvas.create_rectangle(data.width/2 - data.margin*2, data.margin/8, 
+            data.width/2+data.margin*2, data.margin-30, fill = "mediumpurple4")
+            
+        canvas.create_text(data.width/2, data.margin/2.5,
+        text = "Black   Player's   Turn", font="GameofThrones 20", fill = "white")
+        
+
+def gameStateMultiRedrawAll(canvas, data):
+    drawbottomBoardMulti(canvas, data)
+    drawBoardMulti(canvas, data)
+    drawHelpButtonMulti(canvas, data)
+    drawQuitButtonMulti(canvas, data)
+    drawPlayerMulti(canvas, data)
+    
+####################################
+# gameStateEasyAI mode
+####################################
+def gameStateEasyAIKeyPressed(event, data):
+    #if game is finished, dont take anymore pressed keys.
+    if data.finishGame == 1:
+        pass
+    #move rows and columns for shifting keys up, down, left, right
+    elif event.keysym == "Up":
+        data.selectedRow -= 1
+    elif event.keysym == "Down":
+        data.selectedRow += 1
+    elif event.keysym == "Left":
+        data.selectedCol -= 1
+    elif event.keysym == "Right":
+        data.selectedCol += 1
+    elif event.keysym == "p":
+        data.mode = "gameOverState"
+    #insert input by user.
+    elif event.char in data.range:
+        data.insertNum = event.char
+    #selected keys by user
+    data.selection = \
+    (data.selectedRow%(len(data.board)), data.selectedCol%(len(data.board)))
+
+
+def gameStateEasyAIMousePressed(event, data):
+    #if game is finished, dont take anymore pressed mouses.
+    if data.finishGame == 1:
+        pass
+    else:
+        if (data.width-data.margin*2) <= event.x <= (data.width-data.margin) and \
+        (data.margin/8) <= event.y <= (data.margin-30):
+            data.mode = "gameOverState"
+            data.board =  data.tryBoardOriginal
+   
+        if (data.margin) <= event.x<= (data.width/2-data.margin*3) and \
+        (data.margin/8) <= event.y <= (data.margin-30):
+            data.mode = "help"
+            data.board =  data.tryBoardOriginal
+
+        #row and column currently selected by user.
+        data.selectedRow = (event.y -(data.margin)) // data.cellSize
+        data.selectedCol = (event.x -(data.margin))// data.cellSize
+        data.selection = (data.selectedRow, data.selectedCol)
+        if data.selectedRow >= 0 and data.selectedCol >= 0:
+            data.allSelected.append(data.selection)
+            
+        for row in range(len(data.board)):
+            for col in range(len(data.board[row])):
+                if data.allSelected != []:
+                    if len(data.allSelected) %2 == 0:
+                        currRow, currCol = data.allSelected[-1][0], data.allSelected[-1][1]
+                        if currRow == row and currCol == col:
+                            makeMove(data, event)
+
+def drawBoard(canvas, data):
+    #drawbottomBoard(canvas, data)
+
+    for row in range(len(data.tryBoard)):
+        for col in range(len(data.tryBoard[row])):
+            chessPieceType = str(data.tryBoard[row][col])
+            
+            left = col*data.cellSize
+            top = row*data.cellSize
+            #if square/cell is selected, change color of cell.
+            if (row, col) == data.selection:
+                color = "salmon"
+            
+            else:
+                if row%2 == 0 and col%2 != 0:
+                    color = "light blue"
+                if row%2 == 0 and col%2 == 0:
+                    color = "midnightblue"
+
+                if row%2 != 0 and col%2 != 0:
+                    color = "midnightblue"
+                if row%2 != 0 and col%2 == 0:
+                    color = "light blue"
+                    
+            canvas.create_rectangle(data.margin + left, data.margin + top, 
+                                    data.margin + left + data.cellSize, 
+                                    data.margin + top + data.cellSize,
+                                    fill=color, width = 1, outline = "white")
+            
+            if chessPieceType != None:
+                if chessPieceType[0] == "W":
+
+                    if data.normalPieces == False:
+                        canvas.create_text( 
+                                    data.margin + left + data.cellSize/2, 
+                                    data.margin + top + data.cellSize/2,
+                                    text=chessPieceType, fill = "white")
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKing)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WQueen)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WPawn)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKnight)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WRook)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WBishop)
+                    else:
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKing1)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WQueen1)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WPawn1)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKnight1)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WRook1)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WBishop1)
+
+
+
+                if chessPieceType[0] == "B":
+                    if data.normalPieces == False:
+    
+                        canvas.create_text(
+                                        data.margin + left + data.cellSize/2, 
+                                        data.margin + top + data.cellSize/2,
+                                        text=chessPieceType, fill = "Black")
+                        
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKing)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BQueen)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BPawn)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKnight)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BRook)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BBishop)
+                    else:
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKing1)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BQueen1)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BPawn1)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKnight1)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BRook1)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BBishop1)
+                                    
+                                    
+                                    
+    for row in range(len(data.board)):
+        top = row*data.cellSize
+        canvas.create_text(data.margin-10, top + data.margin*(1.5),
+        text = len(data.board) - row) 
+    
+    for row in range(len(data.board)):
+        left = row*data.cellSize
+        canvas.create_text(left + data.margin*1.5, data.height - data.margin+10,
+        text = chr(65+row)) 
+
+def easyAIMove(data, event):
+    
+    
+    
+    pieceIndex = random.randint(0, 15)
+    chessPieceType = data.easyAIList[pieceIndex]
+    chessItem = str(chessPieceType)
+    possibleMoves = list(chessPieceType.allPossibleMoves(data.tryBoard, data))
+    print(possibleMoves)
+    if possibleMoves == []:
+        while possibleMoves == []:
+            pieceIndex = random.randint(0, 15)
+            chessPieceType = data.easyAIList[pieceIndex]
+            chessItem = str(chessPieceType)
+            possibleMoves = list(chessPieceType.allPossibleMoves(data.tryBoard, data))
+
+    randomMoveIndex = random.randint(0, len(possibleMoves)-1)
+    randomMove = possibleMoves[randomMoveIndex]
+    
+    currRow = chessPieceType.row
+    currCol = chessPieceType.col
+    newRow = randomMove[0]
+    newCol = randomMove[1]
+    data.tryBoard[newRow][newCol] = chessPieceType
+    data.tryBoard[currRow][currCol] = None
+    data.originalBoard[newRow][newCol] = str(chessPieceType)
+    data.originalBoard[currRow][currCol] = None
+    chessPieceType.row = newRow
+    chessPieceType.col = newCol
+    data.moveColor += 1
+
+def makeMove(data, event):
+    original = data.allSelected[-2]
+    currRow = int(original[0])
+    currCol = int(original[1])
+
+    move = data.allSelected[-1]
+    newRow = int(move[0])
+    newCol = int(move[1])
+    chessPieceType = (data.tryBoard[currRow][currCol])
+    print(newRow, newCol)
+    if data.moveColor%2 == 0 and str(chessPieceType)[0] == "W":
+        if isLegalMove(data, chessPieceType, currRow, currCol, newRow, newCol):
+            data.tryBoard[newRow][newCol] = chessPieceType
+            data.tryBoard[currRow][currCol] = None
+            data.originalBoard[newRow][newCol] = str(chessPieceType)
+            data.originalBoard[currRow][currCol] = None
+            chessPieceType.row = newRow
+            chessPieceType.col = newCol
+            print(data.originalBoard)
+            data.moveColor += 1
+            easyAIMove(data, event)
+        
+            
+
+
+def isLegalMove(data, chessPieceType, currRow, currCol, newRow, newCol):
+    chessItem = str(chessPieceType)
+    possibleMoves = chessPieceType.allPossibleMoves(data.tryBoard, data)
+    print(possibleMoves)
+    if (newRow, newCol) not in possibleMoves:
+        return False    
+    return True
+
+
+
+def drawbottomBoard(canvas, data):
+    canvas.create_rectangle(0, 0, data.width, data.height, fill = "black")
+    
+    canvas.create_rectangle(data.margin- data.margin/4, 
+    data.margin- data.margin/4, data.width - data.margin/4*3, 
+    data.height-data.margin/4*3, fill = "white")
+
+
+def gameStateEasyAITimerFired(data):
+    pass
+
+def drawHelpButton(canvas, data):
+    canvas.create_rectangle(data.margin, data.margin/8, 
+        data.width/2-data.margin*3, data.margin-30, fill = "mediumpurple4")
+        
+    canvas.create_text(data.margin, data.margin/4, anchor = NW,
+    text = "   Help", font="GameofThrones 20", fill = "white")
+    
+def drawQuitButton(canvas, data):
+    canvas.create_rectangle(data.width - data.margin, data.margin/8, 
+        data.width-data.margin*2, data.margin-30, fill = "mediumpurple4")
+        
+    canvas.create_text(data.width - data.margin*2, data.margin/4, anchor = NW,
+    text = "  Quit", font="GameofThrones 20", fill = "white")
+
+def drawPlayer(canvas, data):
+    if data.moveColor %2 == 0:
+        canvas.create_rectangle(data.width/2 - data.margin*2, data.margin/8, 
+            data.width/2 + data.margin*2, data.margin-30, fill = "mediumpurple4")
+            
+        canvas.create_text(data.width/2, data.margin/2.5,
+        text = "White(Your) Turn", font="GameofThrones 20", fill = "white")
+    
+    if data.moveColor %2 != 0:
+        canvas.create_rectangle(data.width/2 - data.margin*2, data.margin/8, 
+            data.width/2+data.margin*2, data.margin-30, fill = "mediumpurple4")
+            
+        canvas.create_text(data.width/2, data.margin/2.5,
+        text = "Computer's   Turn", font="GameofThrones 20", fill = "white")
+        
+
+def gameStateEasyAIRedrawAll(canvas, data):
+    drawbottomBoard(canvas, data)
+    drawBoard(canvas, data)
+    drawHelpButton(canvas, data)
+    drawQuitButton(canvas, data)
+    drawPlayer(canvas, data)
+ 
+
+####################################
+# gameStateHardAI mode
+####################################
+def gameStateHardAIKeyPressed(event, data):
+    #if game is finished, dont take anymore pressed keys.
+    if data.finishGame == 1:
+        pass
+    #move rows and columns for shifting keys up, down, left, right
+    elif event.keysym == "Up":
+        data.selectedRow -= 1
+    elif event.keysym == "Down":
+        data.selectedRow += 1
+    elif event.keysym == "Left":
+        data.selectedCol -= 1
+    elif event.keysym == "Right":
+        data.selectedCol += 1
+    elif event.keysym == "p":
+        data.mode = "gameOverState"
+    #insert input by user.
+    elif event.char in data.range:
+        data.insertNum = event.char
+    #selected keys by user
+    data.selection = \
+    (data.selectedRow%(len(data.board)), data.selectedCol%(len(data.board)))
+
+
+def gameStateHardAIMousePressed(event, data):
+    #if game is finished, dont take anymore pressed mouses.
+    if data.finishGame == 1:
+        pass
+    else:
+        if (data.width-data.margin*2) <= event.x <= (data.width-data.margin) and \
+        (data.margin/8) <= event.y <= (data.margin-30):
+            data.mode = "gameOverState"
+            data.board =  data.originalBoard
+   
+        if (data.margin) <= event.x<= (data.width/2-data.margin*3) and \
+        (data.margin/8) <= event.y <= (data.margin-30):
+            data.mode = "help"
+            data.board =  data.originalBoard
+
+        #row and column currently selected by user.
+        data.selectedRow = (event.y -(data.margin)) // data.cellSize
+        data.selectedCol = (event.x -(data.margin))// data.cellSize
+        data.selection = (data.selectedRow, data.selectedCol)
+        if data.selectedRow >= 0 and data.selectedCol >= 0:
+            data.allSelected.append(data.selection)
+            
+        for row in range(len(data.board)):
+            for col in range(len(data.board[row])):
+                if data.allSelected != []:
+                    if len(data.allSelected) %2 == 0:
+                        currRow, currCol = data.allSelected[-1][0], data.allSelected[-1][1]
+                        if currRow == row and currCol == col:
+                            makeMoveHardAI(data, event)
+def hardAIIMove(data):
+    pieceIndex = random.randint(0, 15)
+    chessPieceType = data.easyAIList[pieceIndex]
+    chessItem = str(chessPieceType)
+    possibleMoves = list(chessPieceType.allPossibleMoves(data.tryBoard, data))
+    print(possibleMoves)
+    randomMoveIndex = random.randint(0, len(possibleMoves)-1)
+    print(randomMoveIndex)
+    randomMove = possibleMoves[randomMoveIndex]
+    currRow = chessPieceType.row
+    currCol = chessPieceType.col
+    newRow = randomMove[0]
+    newCol = randomMove[1]
+    data.tryBoard[newRow][newCol] = chessPieceType
+    data.tryBoard[currRow][currCol] = None
+    data.originalBoard[newRow][newCol] = str(chessPieceType)
+    data.originalBoard[currRow][currCol] = None
+    chessPieceType.row = newRow
+    chessPieceType.col = newCol
+    data.moveColor += 1
+
+
+def drawBoardHardAI(canvas, data):
+    #drawbottomBoard(canvas, data)
+
+    for row in range(len(data.tryBoard)):
+        for col in range(len(data.tryBoard[row])):
+            chessPieceType = str(data.tryBoard[row][col])
+            
+            left = col*data.cellSize
+            top = row*data.cellSize
+            #if square/cell is selected, change color of cell.
+            if (row, col) == data.selection:
+                color = "salmon"
+            
+            else:
+                if row%2 == 0 and col%2 != 0:
+                    color = "light blue"
+                if row%2 == 0 and col%2 == 0:
+                    color = "midnightblue"
+
+                if row%2 != 0 and col%2 != 0:
+                    color = "midnightblue"
+                if row%2 != 0 and col%2 == 0:
+                    color = "light blue"
+                    
+            canvas.create_rectangle(data.margin + left, data.margin + top, 
+                                    data.margin + left + data.cellSize, 
+                                    data.margin + top + data.cellSize,
+                                    fill=color, width = 1, outline = "white")
+            
+            if chessPieceType != None:
+                if chessPieceType[0] == "W":
+
+                    if data.normalPieces == False:
+                        canvas.create_text( 
+                                    data.margin + left + data.cellSize/2, 
+                                    data.margin + top + data.cellSize/2,
+                                    text=chessPieceType, fill = "white")
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKing)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WQueen)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WPawn)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKnight)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WRook)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WBishop)
+                    else:
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKing1)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WQueen1)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WPawn1)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WKnight1)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WRook1)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.WBishop1)
+
+
+
+                if chessPieceType[0] == "B":
+                    if data.normalPieces == False:
+    
+                        canvas.create_text(
+                                        data.margin + left + data.cellSize/2, 
+                                        data.margin + top + data.cellSize/2,
+                                        text=chessPieceType, fill = "Black")
+                        
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKing)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BQueen)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BPawn)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKnight)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BRook)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BBishop)
+                    else:
+                        if chessPieceType[2:] == "King":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKing1)
+                        if chessPieceType[2:] == "Queen":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BQueen1)
+                        if chessPieceType[2:] == "Pawn":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BPawn1)
+                        if chessPieceType[2:] == "Knight":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BKnight1)
+                        if chessPieceType[2:] == "Rook":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BRook1)
+                        if chessPieceType[2:] == "Bishop":
+                            canvas.create_image(data.margin + left + data.cellSize/2, data.margin + top + + data.cellSize/2,
+                                        image=data.BBishop1)
+                                    
+                                    
+                                    
+    for row in range(len(data.board)):
+        top = row*data.cellSize
+        canvas.create_text(data.margin-10, top + data.margin*(1.5),
+        text = len(data.board) - row) 
+    
+    for row in range(len(data.board)):
+        left = row*data.cellSize
+        canvas.create_text(left + data.margin*1.5, data.height - data.margin+10,
+        text = chr(65+row)) 
+
+
+
+
+def hardAIMove(data, event):
+    maxScore = 0
+    currScore = 0
+    pieceToMove = None
+    currMove = None
+    bestMove = None
+    for piece in (data.easyAIList):
+        print("Piece is " + str(piece))
+        possibleMoves = list(piece.allPossibleMoves(data.tryBoard, data))
+        for move in possibleMoves:
+            print("move is " + str(move))
+            currRow = piece.row
+            currCol = piece.col
+            currMove = move
+            newRow = move[0]
+            newCol = move[1]
+            randomBoard = copy.deepcopy(data.tryBoard)
+            randomBoard[newRow][newCol] = piece
+            randomBoard[currRow][currCol] = None
+            piece.row = newRow
+            piece.col = newCol
+            currScore = getCurrentScore(randomBoard, "B")
+            if currScore > maxScore:
+                maxScore = currScore
+                bestMove = currMove
+                pieceToMove = piece
+            print(currScore)
+            print(maxScore)
+            print(pieceToMove)
+    return (bestMove, pieceToMove)
+    
+    data.moveColor += 1
+
+def getCurrentScore(board, team):
+    playerScore = 0
+    
+    for row in range(len(board)):
+        for col in range(len(board[row])):
+            chessPiece = str(board[row][col])
+            if isinstance(board[row][col], ChessPiece):
+                if chessPiece[0] == team:
+                    if chessPiece[2:] == "Pawn":
+                        playerScore += BPawnScores[row][col]
+                    if chessPiece[2:] == "Rook":
+                        playerScore += BRookScores[row][col]
+                    if chessPiece[2:] == "Bishop":
+                        playerScore += BBishopScores[row][col]
+                    if chessPiece[2:] == "Knight":
+                        playerScore += BKnightScores[row][col]
+                    if chessPiece[2:] == "King":
+                        playerScore += BKingScores[row][col]
+                    if chessPiece[2:] == "Queen":
+                        playerScore += BQueenScores[row][col]
+    return playerScore
+    
+    
+
+
+def makeMoveHardAI(data, event):
+    original = data.allSelected[-2]
+    currRow = int(original[0])
+    currCol = int(original[1])
+
+    move = data.allSelected[-1]
+    newRow = int(move[0])
+    newCol = int(move[1])
+    chessPieceType = (data.tryBoard[currRow][currCol])
+    #print(newRow, newCol)
+    if data.moveColor%2 == 0 and str(chessPieceType)[0] == "W":
+        if isLegalMoveHardAI(data, chessPieceType, currRow, currCol, newRow, newCol):
+            data.tryBoard[newRow][newCol] = chessPieceType
+            data.tryBoard[currRow][currCol] = None
+            data.originalBoard[newRow][newCol] = str(chessPieceType)
+            data.originalBoard[currRow][currCol] = None
+            chessPieceType.row = newRow
+            chessPieceType.col = newCol
+            #print(data.originalBoard)
+            data.moveColor += 1
+            
+        
+            
+
+
+def isLegalMoveHardAI(data, chessPieceType, currRow, currCol, newRow, newCol):
+    chessItem = str(chessPieceType)
+    possibleMoves = chessPieceType.allPossibleMoves(data.tryBoard, data)
+    #print(possibleMoves)
+    if (newRow, newCol) not in possibleMoves:
+        return False    
+    return True
+
+
+
+def drawbottomBoardHardAI(canvas, data):
+    canvas.create_rectangle(0, 0, data.width, data.height, fill = "black")
+    
+    canvas.create_rectangle(data.margin- data.margin/4, 
+    data.margin- data.margin/4, data.width - data.margin/4*3, 
+    data.height-data.margin/4*3, fill = "white")
+
+
+def gameStateHardAITimerFired(data):
+    data.timer += 1
+    if data.timer % 50 == 0:
+        if data.moveColor %2 != 0:
+            hardAIIMove(data)
+
+def drawHelpButtonHardAI(canvas, data):
+    canvas.create_rectangle(data.margin, data.margin/8, 
+        data.width/2-data.margin*3, data.margin-30, fill = "mediumpurple4")
+        
+    canvas.create_text(data.margin, data.margin/4, anchor = NW,
+    text = "   Help", font="GameofThrones 20", fill = "white")
+    
+def drawQuitButtonHardAI(canvas, data):
+    canvas.create_rectangle(data.width - data.margin, data.margin/8, 
+        data.width-data.margin*2, data.margin-30, fill = "mediumpurple4")
+        
+    canvas.create_text(data.width - data.margin*2, data.margin/4, anchor = NW,
+    text = "  Quit", font="GameofThrones 20", fill = "white")
+
+def drawPlayerHardAI(canvas, data):
+    if data.moveColor %2 == 0:
+        canvas.create_rectangle(data.width/2 - data.margin*2, data.margin/8, 
+            data.width/2 + data.margin*2, data.margin-30, fill = "mediumpurple4")
+            
+        canvas.create_text(data.width/2, data.margin/2.5,
+        text = "White  (Your) Turn", font="GameofThrones 20", fill = "white")
+    
+    if data.moveColor %2 != 0:
+        canvas.create_rectangle(data.width/2 - data.margin*2, data.margin/8, 
+            data.width/2+data.margin*2, data.margin-30, fill = "mediumpurple4")
+            
+        canvas.create_text(data.width/2, data.margin/2.5,
+        text = "Computer's   Turn", font="GameofThrones 20", fill = "white")
+        
+
+def gameStateHardAIRedrawAll(canvas, data):
+    drawbottomBoardHardAI(canvas, data)
+    drawBoardHardAI(canvas, data)
+    drawHelpButtonHardAI(canvas, data)
+    drawQuitButtonHardAI(canvas, data)
+    drawPlayerHardAI(canvas, data)
+
+
+
+
+####################################
+# gameOverState mode
+####################################
+
+#gameOver state does not allow any user input or actions other than restarting
+#the game
+
+def gameOverStateMousePressed(event, data):
+    pass
+
+#if s is pressed, game restarts by setting mode to starting screen.
+def gameOverStateKeyPressed(event, data):
+    if event.char == "s":
+        data.mode = "startState"
+
+def gameOverStateTimerFired(data):
+    pass
+
+#this function draws the text on the the gameover screen displaying, the score
+#that was received when playing and instructions on how to re-start the game.
+def gameOverStateRedrawAll(canvas, data):
+    canvas.create_rectangle(0, 0, data.width, data.height, fill = "black")
+    canvas.create_text(data.width/2, data.height/2-data.margin*2,
+                       text="Game is Over!", font="Arial 26 bold", 
+                       fill = "white")
+    #canvas.create_text(data.width/2, data.height/2-data.margin/2,
+     #                  text="Final Score is : " + str(data.score), 
+      #                 font="Arial 20", fill = "white")
+    canvas.create_text(data.width/2, data.height/2+data.margin*2,
+                       text="Press 's' to restart game!", 
+                       font="Arial 20", fill = "white")
+
+
+    
+
+####################################
+# use the run function as-is
+####################################
+
+#RUN Function, cited from the 15-112 2018 animation course Notes.
+
+
+def run(width=300, height=300):
+    
+    def redrawAllWrapper(canvas, data):
+        canvas.delete(ALL)
+        canvas.create_rectangle(0, 0, data.width, data.height,
+                                fill='white', width=0)
+        redrawAll(canvas, data)
+        canvas.update()    
+
+    def mousePressedWrapper(event, canvas, data):
+        mousePressed(event, data)
+        redrawAllWrapper(canvas, data)
+
+    def keyPressedWrapper(event, canvas, data):
+        keyPressed(event, data)
+        redrawAllWrapper(canvas, data)
+
+    def timerFiredWrapper(canvas, data):
+        timerFired(data)
+        redrawAllWrapper(canvas, data)
+        # pause, then call timerFired again
+        canvas.after(data.timerDelay, timerFiredWrapper, canvas, data)
+    # Set up data and call init
+    class Struct(object): pass
+    data = Struct()
+    data.width = width
+    data.height = height
+    data.timerDelay = 100 # milliseconds
+    root = Tk()
+    root.resizable(width=False, height=False) # prevents resizing window
+    init(data)
+    # create the root and the canvas
+    canvas = Canvas(root, width=data.width, height=data.height)
+    canvas.configure(bd=0, highlightthickness=0)
+    canvas.pack()
+    # set up events
+    root.bind("<Button-1>", lambda event:
+                            mousePressedWrapper(event, canvas, data))
+    root.bind("<Key>", lambda event:
+                            keyPressedWrapper(event, canvas, data))
+    timerFiredWrapper(canvas, data)
+    # and launch the app
+    playMusic()
+
+    root.mainloop()  # blocks until window is closed
+    pygame.mixer.music.stop()
+    print("bye!")
+
+run(800, 800)
